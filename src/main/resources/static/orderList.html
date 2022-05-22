@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>物流管理系统 - 订单查询</title>
+    <link rel="stylesheet" href="https://www.layuicdn.com/layui-v2.6.8/css/layui.css">
+</head>
+<body>
+
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>订单中心</legend>
+</fieldset>
+
+<!-- 面板 -->
+<div class="layui-card">
+    <div class="layui-card-header">订单列表</div>
+
+    <div class="layui-card-body">
+        <table id="orderList" lay-filter="orderTable">
+            <!-- 订单表格 -->
+
+        </table>
+    </div>
+
+</div>
+
+</body>
+<script src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://www.layuicdn.com/layui-v2.6.8/layui.js"></script>
+
+
+<script type="text/html" id="headToolbar">
+    <!-- 置空 -->
+</script>
+<!-- 行工具 -->
+<script type="text/html" id="toolbar">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+
+</script>
+
+<script>
+
+    layui.use('table', function () {
+        var table = layui.table;
+
+        //第一个实例
+        table.render({
+            elem: '#orderList'
+            , height: 410
+            , url: '/order/list' // 数据接口
+            , page: false // 分页
+            , toolbar: '#headToolbar' // 头部工具栏
+            , cols: [[ // 表头
+                {field: 'id', title: '订单编号', sort: true, fixed: 'left'}
+                , {field: 'status', title: '订单状态'}
+                , {field: 'orderTime', title: '下单时间', sort: true}
+                , {field: 'shipper', title: '发货人', width: 80}
+                , {field: 'shipperAddress', title: '发货地址'}
+                , {field: 'shipperPhone', title: '发货人电话'}
+                , {field: 'receiver', title: '收货人', width: 80}
+                , {field: 'receiverAddress', title: '收货人地址'}
+                , {field: 'receiverPhone', title: '收货人电话'}
+                , {fixed: 'right', title: '操作', toolbar: '#toolbar'} // 删除
+            ]]
+        });
+
+        //工具条事件
+        table.on('tool(orderTable)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+            var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+            if (layEvent === 'del') { //删除
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                    layer.close(index);
+                    //向服务端发送删除指令
+                    $.ajax({
+                        url: "/order/delete",
+                        type: "POST",
+                        data: {"id": data.id},
+                        dataType: "JSON",
+                        success: function (result) {
+                            layer.msg(result);
+                        },
+                    });
+                });
+            } else if (layEvent === 'LAYTABLE_TIPS') {
+                layer.alert('Hi，头部工具栏扩展的右侧图标。');
+            }
+        });
+
+
+    });
+
+
+</script>
+
+</html>

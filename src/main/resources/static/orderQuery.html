@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>物流管理系统 - 订单查询</title>
+    <link rel="stylesheet" href="https://www.layuicdn.com/layui-v2.6.8/css/layui.css">
+</head>
+<body>
+
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>订单查询</legend>
+</fieldset>
+
+<!-- 面板 -->
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-form-item">
+            <label class="layui-form-label">订单编号</label>
+            <div class="layui-input-inline">
+                <input type="text" id="orderId" placeholder="订单编号"
+                       autocomplete="off" class="layui-input">
+            </div>
+            <button onclick="search();" class="layui-btn">
+                <i class="layui-icon">&#xe615;</i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div style="padding: 25px">
+    <ul class="layui-timeline">
+        <div class="layui-col-md12">
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+                <div class="layui-timeline-content layui-text">
+                    <div class="layui-timeline-title">订单信息</div>
+                    <div class="layui-card-body" id="order"></div>
+                </div>
+            </li>
+        </div>
+
+        <div class="layui-col-md12">
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+                <div class="layui-timeline-content layui-text">
+                    <div class="layui-timeline-title">物流信息</div>
+                    <div class="layui-card-body">
+                        <ul class="layui-timeline" id="logistics">
+
+                        </ul>
+                    </div>
+                </div>
+            </li>
+        </div>
+
+
+        <!--
+        <li class="layui-timeline-item">
+            <i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+            <div class="layui-timeline-content layui-text">
+                <div class="layui-timeline-title">过去</div>
+            </div>
+        </li>
+        -->
+
+    </ul>
+</div>
+
+</body>
+<script src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://www.layuicdn.com/layui-v2.6.8/layui.js"></script>
+<script>
+    function search() {
+        // 取到订单编号
+        var orderId = $("#orderId").val();
+        $.ajax({
+            url: "/order/" + orderId,
+            type: "GET",
+            dataType: "JSON",
+            success: function (order) {
+                if (order == null || order == undefined || order == "") {
+                    layui.use = layer.msg("订单不存在");
+                    return;
+                }
+                // 处理订单信息
+                $("#order").append("订单编号：" + orderId + "（" + order["status"] + ")<hr>")
+                    .append("发货人：" + order["shipper"] + "<br/>")
+                    .append("发货人地址：" + order["shipperAddress"] + "<br/>")
+                    .append("发货人电话：" + order["shipperPhone"] + "<br/>")
+                    .append("下单时间：" + order["orderTime"] + "<br/>")
+                    .append("发货时间：" + order["shipTime"] + "<br/>")
+                    .append("收货人：" + order["receiver"] + "<br/>")
+                    .append("发货人地址：" + order["receiverAddress"] + "<br/>")
+                    .append("收货人电话：" + order["receiverPhone"] + "<br/>")
+
+                // 获取物流信息
+                let logistics = order['logistics'];
+                // 倒序
+                for (var i = logistics.length - 1; i >= 0; i--) {
+                    // 处理物流信息
+                    $("#logistics").append('<li class = "layui-timeline-item">'
+                        + '<i class="layui-icon layui-timeline-axis"></i>'
+                        + '<div class="layui-timeline-content layui-text">'
+                        + '<h3 class="layui-timeline-title">'
+                        + '(' + logistics[i].operation + ')'
+                        + logistics[i].operationDate + '</h3>'
+                        + '<p>' + logistics[i].details + '</p>'
+                        + '<p>操作员：' + logistics[i].operator + '&nbsp;'
+                        + '操作员电话：' + logistics[i].operatorPhone + '&nbsp;'
+                        + '操作地址：' + logistics[i].address + '</p></div></li>');
+                }
+            },
+        });
+    }
+</script>
+</html>
